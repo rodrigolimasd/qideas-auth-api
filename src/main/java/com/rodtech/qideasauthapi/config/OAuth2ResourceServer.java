@@ -10,11 +10,20 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 @EnableResourceServer
 public class OAuth2ResourceServer extends ResourceServerConfigurerAdapter {
 
+    /**
+     * auth2 permission resource
+     * @param resources
+     */
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
         resources.resourceId("services");
     }
 
+    /**
+     * setting oauth2 permissions on the web layer
+     * @param http
+     * @throws Exception
+     */
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.requestMatchers()

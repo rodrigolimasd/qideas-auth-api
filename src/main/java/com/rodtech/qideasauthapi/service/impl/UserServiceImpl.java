@@ -1,0 +1,87 @@
+package com.rodtech.qideasauthapi.service.impl;
+
+import com.rodtech.qideasauthapi.dto.UserDTO;
+import com.rodtech.qideasauthapi.enums.UserType;
+import com.rodtech.qideasauthapi.exception.RegisteredEmailException;
+import com.rodtech.qideasauthapi.exception.UserNotFoundException;
+import com.rodtech.qideasauthapi.model.Permission;
+import com.rodtech.qideasauthapi.model.User;
+import com.rodtech.qideasauthapi.repository.UserRepository;
+import com.rodtech.qideasauthapi.service.UserService;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Optional;
+
+@Service("userDetailsService")
+public class UserServiceImpl implements UserService, UserDetailsService {
+
+    private static final String EMAIL_REGISTERED = "E-mail already registered";
+
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findFirstByEmail(email)
+                .orElseThrow(()-> new BadCredentialsException("Bad Credentials"));
+        return user;
+    }
+
+    @Override
+    public UserDTO create(UserDTO userDTO) {
+
+        //get dto
+        User user = User.builder()
+                .username(userDTO.getUsername())
+                .email(userDTO.getEmail())
+                .password("{bcrypt}" + BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt(10)))
+                .enabled(true)
+                .type(UserType.USER)
+                .accountNonLocked(true)
+                .accountNonExpired(true)
+                .credentialsNonExpired(true)
+                .permissions(Collections.singleton(
+                        Permission.builder().name("client").build()
+                ))
+                .build();
+
+        //valid
+        validSaveUser(user);
+
+        userRepository.save(user);
+
+        return userDTO;
+    }
+
+    @Override
+    public UserDTO findByEmail(String email) {
+        User user = findUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return UserDTO.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
+    private void validSaveUser(User user){
+        findUserByEmail(user.getEmail())
+                .ifPresent(userDb -> {
+                    if(user.getId()==null || !user.getId().equals(userDb.getId()))
+                        throw new RegisteredEmailException(EMAIL_REGISTERED);
+                });
+    }
+
+    private Optional<User> findUserByEmail(String email){
+        return userRepository.findFirstByEmail(email);
+    }
+
+}
