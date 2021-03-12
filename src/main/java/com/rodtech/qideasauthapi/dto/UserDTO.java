@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO extends BaseModelAPI {
+    private String id;
     private String email;
     private String username;
     private String password;

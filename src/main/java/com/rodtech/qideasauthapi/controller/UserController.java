@@ -2,6 +2,8 @@ package com.rodtech.qideasauthapi.controller;
 
 import com.rodtech.qideasauthapi.dto.UserDTO;
 import com.rodtech.qideasauthapi.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,13 @@ public class UserController {
     }
 
     @PreAuthorize("#oauth2.hasScope('write')")
+    @GetMapping
+    public ResponseEntity<?> list(Pageable pageable){
+        Page<UserDTO> list = userService.list(pageable);
+        return ResponseEntity.ok(list);
+    }
+
+    @PreAuthorize("#oauth2.hasScope('write')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserDTO userDTO) {
         UserDTO newUSer = userService.create(userDTO);
@@ -31,9 +40,16 @@ public class UserController {
         return ResponseEntity.created(uri).body(newUSer);
     }
 
-    @PreAuthorize("#oauth2.hasScope('write') OR #oauth2.hasScope('read')")
+    @PreAuthorize("#oauth2.hasScope('write')")
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.findByEmail(email));
+    }
+
+    @PreAuthorize("#oauth2.hasScope('write')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable String id){
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

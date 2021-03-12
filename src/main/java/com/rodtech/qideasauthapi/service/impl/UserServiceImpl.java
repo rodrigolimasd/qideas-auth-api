@@ -8,6 +8,8 @@ import com.rodtech.qideasauthapi.model.Permission;
 import com.rodtech.qideasauthapi.model.User;
 import com.rodtech.qideasauthapi.repository.UserRepository;
 import com.rodtech.qideasauthapi.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,6 +39,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public Page<UserDTO> list(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(p-> UserDTO.builder()
+                        .id(p.getId())
+                        .email(p.getEmail())
+                        .build());
+    }
+
+    @Override
     public UserDTO create(UserDTO userDTO) {
 
         //get dto
@@ -57,7 +68,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         //valid
         validSaveUser(user);
 
-        userRepository.save(user);
+        user = userRepository.save(user);
+        userDTO.setId(user.getId());
 
         return userDTO;
     }
@@ -70,6 +82,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .build();
+    }
+
+    @Override
+    public void delete(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        userRepository.delete(user);
     }
 
     private void validSaveUser(User user){
