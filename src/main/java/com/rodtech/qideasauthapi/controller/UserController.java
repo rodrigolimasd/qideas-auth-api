@@ -47,9 +47,9 @@ public class UserController {
     }
 
     @PreAuthorize("#oauth2.hasScope('write')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id){
-        userService.delete(id);
+    @DeleteMapping("/email/{email}")
+    public ResponseEntity<?> delete(@PathVariable String email){
+        userService.deleteByEmail(email);
         return ResponseEntity.noContent().build();
     }
 }
