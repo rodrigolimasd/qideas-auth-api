@@ -61,7 +61,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     @ExceptionHandler(UserNotFoundException.class)
-    protected ResponseEntity<Object> handleRegisteredUsernameException(
+    protected ResponseEntity<Object> handleUserNotFoundException(
             RegisteredEmailException ex,
             WebRequest request) {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage(), Collections.emptyList());

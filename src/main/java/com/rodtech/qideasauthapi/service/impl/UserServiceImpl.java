@@ -52,7 +52,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         //get dto
         User user = User.builder()
-                .username(userDTO.getUsername())
                 .email(userDTO.getEmail())
                 .password("{bcrypt}" + BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt(10)))
                 .enabled(true)
@@ -79,7 +78,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = findUserByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         return UserDTO.builder()
-                .username(user.getUsername())
                 .email(user.getEmail())
                 .build();
     }

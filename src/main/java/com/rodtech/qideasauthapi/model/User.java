@@ -22,7 +22,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class User extends BaseModel implements UserDetails {
     private String email;
-    private String username;
     private String password;
     private Boolean enabled;
     private UserType type;
@@ -36,6 +35,11 @@ public class User extends BaseModel implements UserDetails {
         Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
         permissions.forEach(p -> authorities.add(new SimpleGrantedAuthority(p.getName().toUpperCase())));
         return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
